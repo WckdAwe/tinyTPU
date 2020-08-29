@@ -99,15 +99,15 @@ package body TPU_PACK is
     begin
         case BITVECTOR is
             when "0000" => return NO_ACTIVATION;
-            when "0001" => return RELU;
-            when "0010" => return RELU6;
+            when "0001" => return RELU; -- Included by default
+            when "0010" => return RELU6; -- Implemented
             when "0011" => return CRELU;
-            when "0100" => return ELU;
+            when "0100" => return ELU; -- Implemented
             when "0101" => return SELU;
             when "0110" => return SOFTPLUS;
-            when "0111" => return SOFTSIGN;
+            when "0111" => return SOFTSIGN; -- Implemented
             when "1000" => return DROPOUT;
-            when "1001" => return SIGMOID;
+            when "1001" => return SIGMOID; -- Included by default
             when "1010" => return TANH;
             when others => 
                 report "Unknown activation function!" severity ERROR;

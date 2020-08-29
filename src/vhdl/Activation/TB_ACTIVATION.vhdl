@@ -94,7 +94,7 @@ begin
         -- TEST: signed Sigmoid
         SIGNED_NOT_UNSIGNED <= '1';
         ACTIVATION_FUNCTION_AS_TYPE <= SIGMOID;
-        -- test boundary: −2147483648           - equivalence class 0
+        -- test boundary: ?2147483648           - equivalence class 0
         ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-2147483648, 4*BYTE_WIDTH)));
         wait until '1'=CLK and CLK'event;
         -- test one value in between: -367289   - equivalence class 0
@@ -168,14 +168,14 @@ begin
         -- TEST: signed ELU
         SIGNED_NOT_UNSIGNED <= '1';
         ACTIVATION_FUNCTION_AS_TYPE <= ELU;
-        -- test boundary: −2147483648           - equivalence class 153 (-0.195)
+        -- test boundary: 2147483648           - equivalence class 153 (-0.195)
         ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-2147483648, 4*BYTE_WIDTH)));
         wait until '1'=CLK and CLK'event;
         -- test one value in between: -367289   - equivalence class 153 (-0.195)
         ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-367289, 4*BYTE_WIDTH)));
         wait until '1'=CLK and CLK'event;
         -- test boundary: -4                    - equivalence class 153 (-0.195)
-        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-6, 2*BYTE_WIDTH)) & std_logic_vector(to_signed(0, 2*BYTE_WIDTH)));
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-4, 2*BYTE_WIDTH)) & std_logic_vector(to_signed(0, 2*BYTE_WIDTH)));
         wait until '1'=CLK and CLK'event;
         -- test transition values
         for i in -4 to 0 loop
@@ -204,6 +204,7 @@ begin
                 wait until '1'=CLK and CLK'event;
             end loop;
         end loop;
+        
         -- test boundary: 1                     - equivalence class 255
         ACTIVATION_INPUT <= (others => std_logic_vector(to_unsigned(1, 2*BYTE_WIDTH)) & std_logic_vector(to_unsigned(0, 2*BYTE_WIDTH)));
         wait until '1'=CLK and CLK'event;
@@ -213,6 +214,59 @@ begin
         -- test boundary 4294967295:            - equivalence class 255
         ACTIVATION_INPUT <= (others => (others => '1'));
         wait until '1'=CLK and CLK'event;
+
+
+
+        -- TEST: signed SELU
+        SIGNED_NOT_UNSIGNED <= '1';
+        ACTIVATION_FUNCTION_AS_TYPE <= SELU;
+        -- test boundary: -2147483648           - equivalence class 146 (-1.7188)
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-2147483648, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test one value in between: -367289   - equivalence class 146 (-1.7188)
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-367289, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test boundary: -4                    - equivalence class 146 (-1.7188)
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-4, 2*BYTE_WIDTH)) & std_logic_vector(to_signed(0, 2*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test transition values
+        for i in -4 to 3 loop
+            for j in 0 to 255 loop
+                ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(i, 2*BYTE_WIDTH)) & std_logic_vector(to_signed(j, BYTE_WIDTH)) & std_logic_vector(to_signed(0, BYTE_WIDTH)));
+                wait until '1'=CLK and CLK'event;
+            end loop;
+        end loop;
+        -- test boundary: 1                     - equivalence class 127 (~2)
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(1, 2*BYTE_WIDTH)) & std_logic_vector(to_unsigned(0, 2*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test one value in between: 8381865   - equivalence class 127 (~2)
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(8381865, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test boundary 2147483647:            - equivalence class 127 (~2)
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(2147483647, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        
+        -- TEST: unsigned SELU
+        SIGNED_NOT_UNSIGNED <= '0';
+        ACTIVATION_FUNCTION_AS_TYPE <= SELU;
+        -- test transition values
+        for i in 0 to 255 loop
+            for j in 0 to 255 loop
+                ACTIVATION_INPUT <= (others => std_logic_vector(to_unsigned(i, 2*BYTE_WIDTH)) & std_logic_vector(to_unsigned(j, BYTE_WIDTH)) & std_logic_vector(to_unsigned(0, BYTE_WIDTH)));
+                wait until '1'=CLK and CLK'event;
+            end loop;
+        end loop;
+        -- test boundary: 1                     - equivalence class 255
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_unsigned(1, 2*BYTE_WIDTH)) & std_logic_vector(to_unsigned(0, 2*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test one value in between: 98235281  - equivalence class 255
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_unsigned(98235281, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test boundary 4294967295:            - equivalence class 255
+        ACTIVATION_INPUT <= (others => (others => '1'));
+        wait until '1'=CLK and CLK'event;
+
+
 
         stop_the_clock <= true;
         wait;

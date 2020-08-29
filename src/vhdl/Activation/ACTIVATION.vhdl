@@ -54,12 +54,18 @@ architecture BEH of ACTIVATION is
     constant SIGMOID_SIGNED     : INTEGER_ARRAY_TYPE(-88 to 70) := (1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,6,6,6,7,7,8,8,9,9,10,10,11,12,12,13,14,14,15,16,17,18,19,20,21,22,23,25,26,27,29,30,31,33,34,36,38,39,41,43,45,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,82,83,85,87,89,90,92,94,95,97,98,99,101,102,103,105,106,107,108,109,110,111,112,113,114,114,115,116,116,117,118,118,119,119,120,120,121,121,122,122,122,123,123,123,124,124,124,124,124,125,125,125,125,125,126,126,126,126,126,126,126,126);
     
     -- ELU Table (a=0.195) 
+    -- More accuracy can be gained if counting from -4 to 1 -> Q3.5 instead of Q4.4 which is currently implemented
     constant ELU_SIGNED      : INTEGER_ARRAY_TYPE(-63 to 15) := (152, 152, 152, 152, 152, 152, 152, 152, 152, 152, 152, 152, 152, 152, 152, 152, 152, 152, 151, 151, 151, 151, 151, 151, 151, 151, 150, 150, 150, 150, 150, 150, 149, 149, 149, 149, 148, 148, 148, 147, 147, 147, 146, 146, 145, 145, 144, 144, 143, 143, 142, 141, 140, 140, 139, 138, 137, 136, 135, 134, 132, 131, 130, 0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120);
+
+    -- SELU Table (a=1.67326, l=1.0507) | Q3.5 -> Q2.6 (TODO: Maybe should be 3.5->3.5 -> Wider range in x > 0 but lower precision of x <= 0)
+    constant SELU_SIGNED      : INTEGER_ARRAY_TYPE(-115 to 60) := (147, 147, 147, 147, 147, 147, 147, 147, 147, 148, 148, 148, 148, 148, 148, 148, 149, 149, 149, 149, 149, 149, 150, 150, 150, 150, 150, 151, 151, 151, 151, 152, 152, 152, 152, 153, 153, 153, 154, 154, 154, 155, 155, 155, 156, 156, 157, 157, 157, 158, 158, 159, 159, 160, 160, 161, 161, 162, 162, 163, 164, 164, 165, 166, 166, 167, 168, 169, 169, 170, 171, 172, 173, 174, 175, 176, 177, 178, 179, 180, 181, 182, 184, 185, 186, 188, 189, 190, 192, 193, 195, 197, 198, 200, 202, 204, 206, 208, 210, 212, 214, 216, 218, 221, 223, 226, 228, 231, 234, 237, 240, 243, 246, 249, 253, 0, 2, 4, 6, 8, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 32, 34, 36, 38, 40, 42, 44, 46, 48, 50, 53, 55, 57, 59, 61, 63, 65, 67, 69, 71, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 95, 97, 99, 101, 103, 105, 107, 109, 111, 113, 116, 118, 120, 122, 124, 126);
+    -- Unsigned SELU could be just a standard RELU even though we have a multiplier l by 1.0507
 
     type SIGMOID_ARRAY_TYPE is array(natural range<>) of std_logic_vector(20 downto 0);
     type RELU_ARRAY_TYPE is array(natural range<>) of std_logic_vector(3*BYTE_WIDTH-1 downto 0);
 
-    type ELU_ARRAY_TYPE is array(natural range<>) of std_logic_vector(3*BYTE_WIDTH-1 downto 0); -- 24 Bits (Q16.8) -> Q4.4
+    type ELU_ARRAY_TYPE is array(natural range<>) of std_logic_vector(3*BYTE_WIDTH-1 downto 0); -- 24 Bits Q16.8 -> Q4.4 | TODO -> 3.4
+    type SELU_ARRAY_TYPE is array(natural range<>) of std_logic_vector(3*BYTE_WIDTH-1 downto 0); -- 24 Bits [Signed: Q16.5 + 3&0 -> Q3.5 || Unsigned: Qu16.8 -> Qu8]
     
     signal INPUT_REG_cs     : WORD_ARRAY_TYPE(0 to MATRIX_WIDTH-1) := (others => (others => '0'));
     signal INPUT_REG_ns     : WORD_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
@@ -75,10 +81,14 @@ architecture BEH of ACTIVATION is
 
     signal ELU_ROUND_REG_cs : ELU_ARRAY_TYPE(0 to MATRIX_WIDTH-1) := (others => (others => '0'));
     signal ELU_ROUND_REG_ns : ELU_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
+
+    signal SELU_ROUND_REG_cs : SELU_ARRAY_TYPE(0 to MATRIX_WIDTH-1) := (others => (others => '0'));
+    signal SELU_ROUND_REG_ns : SELU_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
     
     signal RELU_OUTPUT      : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
     signal SIGMOID_OUTPUT   : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
     signal ELU_OUTPUT       : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
+    signal SELU_OUTPUT      : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
     
     signal OUTPUT_REG_cs    : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1) := (others => (others => '0'));
     signal OUTPUT_REG_ns    : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
@@ -112,8 +122,16 @@ begin
             end if;
 
             -- ELU Round --
-            -- ELU_ROUND_REG_ns(i)    <= std_logic_vector(unsigned(INPUT_REG_cs(i)(4*BYTE_WIDTH-1 downto 2*BYTE_WIDTH-4)) + INPUT_REG_cs(i)(2*BYTE_WIDTH-5));
             ELU_ROUND_REG_ns(i)    <= std_logic_vector(unsigned(INPUT_REG_cs(i)(4*BYTE_WIDTH-1 downto 1*BYTE_WIDTH)) + INPUT_REG_cs(i)(1*BYTE_WIDTH-1)); -- 24 Bits Progression
+
+            -- SELU Round --
+            if SIGNED_NOT_UNSIGNED_REG_cs(0) = '0' then
+                -- unsigned - Qu4.4 table range
+                SELU_ROUND_REG_ns(i) <= std_logic_vector(unsigned(INPUT_REG_cs(i)(4*BYTE_WIDTH-1 downto 1*BYTE_WIDTH)) + INPUT_REG_cs(i)(1*BYTE_WIDTH-1));
+            else
+                -- signed - Q3.5 table range
+                SELU_ROUND_REG_ns(i) <= std_logic_vector(unsigned(INPUT_REG_cs(i)(4*BYTE_WIDTH-1 downto 2*BYTE_WIDTH-5)) + INPUT_REG_cs(i)(2*BYTE_WIDTH-6)) & '0' & '0' & '0';
+            end if;
         end loop;
     end process ROUND;
     
@@ -168,11 +186,11 @@ begin
             if SIGNED_NOT_UNSIGNED_v = '1' then
                 -- Q4.4
                 if    signed(ELU_ROUND_v(i)(3*BYTE_WIDTH-1 downto 1*BYTE_WIDTH)) <= -4 then -- Bounded ELU (0.195)
-                    ELU_OUTPUT_v(i) := std_logic_vector(to_signed(153, BYTE_WIDTH));
+                    ELU_OUTPUT_v(i) := std_logic_vector(to_unsigned(153, BYTE_WIDTH));
                 elsif signed(ELU_ROUND_v(i)(3*BYTE_WIDTH-1 downto 1*BYTE_WIDTH)) >= 1 then -- Bounded ELU (~1)
-                    ELU_OUTPUT_v(i) := std_logic_vector(to_signed(127, BYTE_WIDTH));
+                    ELU_OUTPUT_v(i) := std_logic_vector(to_unsigned(127, BYTE_WIDTH));
                 else -- Bounded ELU (0.195) & RELU (0 <= x < 1)
-                    ELU_OUTPUT_v(i) := std_logic_vector(to_signed(ELU_SIGNED(to_integer(signed(ELU_ROUND_v(i)(2*BYTE_WIDTH-5 downto 1*BYTE_WIDTH-4)))), BYTE_WIDTH));
+                    ELU_OUTPUT_v(i) := std_logic_vector(to_unsigned(ELU_SIGNED(to_integer(signed(ELU_ROUND_v(i)(2*BYTE_WIDTH-5 downto 1*BYTE_WIDTH-4)))), BYTE_WIDTH));
                 end if;
             else
                 -- ELU Behaves exactly like RELU if unsigned 
@@ -186,6 +204,39 @@ begin
         
         ELU_OUTPUT <= ELU_OUTPUT_v;
     end process ELU_ACTIVATION;
+
+    SELU_ACTIVATION:
+    process(SIGNED_NOT_UNSIGNED_REG_cs(1), SELU_ROUND_REG_cs) is
+        variable SIGNED_NOT_UNSIGNED_v  : std_logic;
+        variable SELU_ROUND_v           : SELU_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
+        
+        variable SELU_OUTPUT_v          : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
+    begin
+        SIGNED_NOT_UNSIGNED_v   := SIGNED_NOT_UNSIGNED_REG_cs(1);
+        SELU_ROUND_v            := SELU_ROUND_REG_cs;
+        
+        for i in 0 to MATRIX_WIDTH-1 loop
+            if SIGNED_NOT_UNSIGNED_v = '1' then
+                -- Q3.5 -> Q2.6
+                if signed(SELU_ROUND_v(i)(23 downto 3)) < -115 then -- Bounded SELU (-1.7188 -> 146)
+                    SELU_OUTPUT_v(i) := std_logic_vector(to_unsigned(146, BYTE_WIDTH));
+                elsif signed(SELU_ROUND_v(i)(23 downto 3)) > 60 then -- Bounded SELU (+1.9844, 127)
+                    SELU_OUTPUT_v(i) := std_logic_vector(to_unsigned(127, BYTE_WIDTH));
+                else 
+                    SELU_OUTPUT_v(i) := std_logic_vector(to_unsigned(SELU_SIGNED(to_integer(signed(SELU_ROUND_v(i)(23 downto 3)))), BYTE_WIDTH));
+                end if;
+            else
+                -- TODO: Q4.4 - SELU Behaves similarly to RELU when unsigned, just multiplied by a factor of 'l'.
+                if  unsigned(SELU_ROUND_v(i)) > 255 then -- Bounded SELU
+                    SELU_OUTPUT_v(i) := std_logic_vector(to_unsigned(255, BYTE_WIDTH));
+                else
+                    SELU_OUTPUT_v(i) := SELU_ROUND_v(i)(BYTE_WIDTH-1 downto 0);
+                end if;
+            end if;
+        end loop;
+        
+        SELU_OUTPUT <= SELU_OUTPUT_v;
+    end process SELU_ACTIVATION;
 
     SIGMOID_ACTIVATION:
     process(SIGNED_NOT_UNSIGNED_REG_cs(1), SIGMOID_ROUND_REG_cs) is
@@ -224,6 +275,7 @@ begin
         variable RELU_OUTPUT_v          : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
         variable SIGMOID_OUTPUT_v       : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
         variable ELU_OUTPUT_v           : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
+        variable SELU_OUTPUT_v          : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
         variable ACTIVATION_INPUT_v     : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
         
         variable OUTPUT_REG_ns_v        : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
@@ -232,12 +284,14 @@ begin
         RELU_OUTPUT_v           := RELU_OUTPUT;
         SIGMOID_OUTPUT_v        := SIGMOID_OUTPUT;
         ELU_OUTPUT_v            := ELU_OUTPUT;
+        SELU_OUTPUT_v           := SELU_OUTPUT;
         ACTIVATION_INPUT_v      := INPUT_PIPE0_cs;
         for i in 0 to MATRIX_WIDTH-1 loop            
             case BITS_TO_ACTIVATION(ACTIVATION_FUNCTION_v) is
                 when RELU => OUTPUT_REG_ns_v(i) := RELU_OUTPUT_v(i);
                 when SIGMOID => OUTPUT_REG_ns_v(i) := SIGMOID_OUTPUT_v(i);
                 when ELU => OUTPUT_REG_ns_v(i) := ELU_OUTPUT_v(i);
+                when SELU => OUTPUT_REG_ns_v(i) := SELU_OUTPUT_v(i);
                 when NO_ACTIVATION => OUTPUT_REG_ns_v(i) := ACTIVATION_INPUT_v(i);
                 when others => 
                     report "Unknown activation function!" severity ERROR;
@@ -260,7 +314,8 @@ begin
                 INPUT_PIPE0_cs  <= (others => (others => '0'));
                 RELU_ROUND_REG_cs   <= (others => (others => '0'));
                 SIGMOID_ROUND_REG_cs<= (others => (others => '0'));
-                ELU_ROUND_REG_cs<= (others => (others => '0'));
+                ELU_ROUND_REG_cs    <= (others => (others => '0'));
+                SELU_ROUND_REG_cs   <= (others => (others => '0'));
                 SIGNED_NOT_UNSIGNED_REG_cs  <= (others => '0');
                 ACTIVATION_FUNCTION_REG0_cs <= (others => '0');
                 ACTIVATION_FUNCTION_REG1_cs <= (others => '0');
@@ -272,6 +327,7 @@ begin
                     RELU_ROUND_REG_cs   <= RELU_ROUND_REG_ns;
                     SIGMOID_ROUND_REG_cs<= SIGMOID_ROUND_REG_ns;
                     ELU_ROUND_REG_cs <= ELU_ROUND_REG_ns;
+                    SELU_ROUND_REG_cs <= SELU_ROUND_REG_ns;
                     SIGNED_NOT_UNSIGNED_REG_cs  <= SIGNED_NOT_UNSIGNED_REG_ns;
                     ACTIVATION_FUNCTION_REG0_cs <= ACTIVATION_FUNCTION_REG0_ns;
                     ACTIVATION_FUNCTION_REG1_cs <= ACTIVATION_FUNCTION_REG1_ns;
