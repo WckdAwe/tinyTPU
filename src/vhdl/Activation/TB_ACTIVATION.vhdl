@@ -316,6 +316,104 @@ begin
         ACTIVATION_INPUT <= (others => (others => '1'));
         wait until '1'=CLK and CLK'event;
 
+        -- TEST: signed SOFTSIGN
+        SIGNED_NOT_UNSIGNED <= '1';
+        ACTIVATION_FUNCTION_AS_TYPE <= SOFTSIGN;
+        -- test boundary: ?2147483648           - equivalence class 243
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-2147483648, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test one value in between: -367289   - equivalence class 243
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-367289, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test boundary: -9                    - equivalence class 243
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-9, 2*BYTE_WIDTH)) & std_logic_vector(to_signed(0, 2*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test transition values
+        for i in -8 to 7 loop
+            for j in 0 to 255 loop
+                ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(i, 2*BYTE_WIDTH)) & std_logic_vector(to_signed(j, BYTE_WIDTH)) & std_logic_vector(to_signed(0, BYTE_WIDTH)));
+                wait until '1'=CLK and CLK'event;
+            end loop;
+        end loop;
+        -- test boundary: 8                     - equivalence class 113
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(8, 2*BYTE_WIDTH)) & std_logic_vector(to_unsigned(0, 2*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test one value in between: 8381865   - equivalence class 113
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(8381865, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test boundary 2147483647:            - equivalence class 113
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(2147483647, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        
+        -- TEST: unsigned SOFTSING
+        SIGNED_NOT_UNSIGNED <= '0';
+        ACTIVATION_FUNCTION_AS_TYPE <= SOFTSIGN;
+        -- test transition values
+        for i in 0 to 8 loop
+            for j in 0 to 255 loop
+                ACTIVATION_INPUT <= (others => std_logic_vector(to_unsigned(i, 2*BYTE_WIDTH)) & std_logic_vector(to_unsigned(j, BYTE_WIDTH)) & std_logic_vector(to_unsigned(0, BYTE_WIDTH)));
+                wait until '1'=CLK and CLK'event;
+            end loop;
+        end loop;
+        -- test boundary: 9                     - equivalence class 228
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_unsigned(9, 2*BYTE_WIDTH)) & std_logic_vector(to_unsigned(0, 2*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test one value in between: 98235281  - equivalence class 228
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_unsigned(98235281, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test boundary 4294967295:            - equivalence class 228
+        ACTIVATION_INPUT <= (others => (others => '1'));
+        wait until '1'=CLK and CLK'event;
+
+        -- TEST: signed SOFTPLUS
+        SIGNED_NOT_UNSIGNED <= '1';
+        ACTIVATION_FUNCTION_AS_TYPE <= SOFTPLUS;
+        -- test boundary: ?2147483648           - equivalence class 4
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-2147483648, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test one value in between: -367289   - equivalence class 4
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-367289, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test boundary: -5                    - equivalence class 4
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(-5, 2*BYTE_WIDTH)) & std_logic_vector(to_signed(0, 2*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test transition values
+        for i in -4 to 3 loop
+            for j in 0 to 255 loop
+                ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(i, 2*BYTE_WIDTH)) & std_logic_vector(to_signed(j, BYTE_WIDTH)) & std_logic_vector(to_signed(0, BYTE_WIDTH)));
+                wait until '1'=CLK and CLK'event;
+            end loop;
+        end loop;
+        -- test boundary: 4                     - equivalence class 255
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(4, 2*BYTE_WIDTH)) & std_logic_vector(to_unsigned(0, 2*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test one value in between: 8381865   - equivalence class 255
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(8381865, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test boundary 2147483647:            - equivalence class 255
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_signed(2147483647, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        
+        -- TEST: unsigned SOFTPLUS
+        SIGNED_NOT_UNSIGNED <= '0';
+        ACTIVATION_FUNCTION_AS_TYPE <= SOFTPLUS;
+        -- test transition values
+        for i in 0 to 2 loop
+            for j in 0 to 255 loop
+                ACTIVATION_INPUT <= (others => std_logic_vector(to_unsigned(i, 2*BYTE_WIDTH)) & std_logic_vector(to_unsigned(j, BYTE_WIDTH)) & std_logic_vector(to_unsigned(0, BYTE_WIDTH)));
+                wait until '1'=CLK and CLK'event;
+            end loop;
+        end loop;
+        -- test boundary: 3                     - equivalence class 255
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_unsigned(3, 2*BYTE_WIDTH)) & std_logic_vector(to_unsigned(0, 2*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test one value in between: 98235281  - equivalence class 255
+        ACTIVATION_INPUT <= (others => std_logic_vector(to_unsigned(98235281, 4*BYTE_WIDTH)));
+        wait until '1'=CLK and CLK'event;
+        -- test boundary 4294967295:            - equivalence class 255
+        ACTIVATION_INPUT <= (others => (others => '1'));
+        wait until '1'=CLK and CLK'event;
+
 
         stop_the_clock <= true;
         wait;

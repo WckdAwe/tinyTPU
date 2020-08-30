@@ -417,7 +417,7 @@ begin
             if SIGNED_NOT_UNSIGNED_v = '1' then -- Signed
                 if signed(SOFTSIGN_ROUND_v(i)(20 downto 1)) < -128 then
                     SOFTSIGN_OUTPUT_v(i) := (others => '0');
-                elsif signed(SOFTSIGN_ROUND_v(i)(20 downto 1)) > 110 then
+                elsif signed(SOFTSIGN_ROUND_v(i)(20 downto 1)) > 109 then
                     SOFTSIGN_OUTPUT_v(i) := std_logic_vector(to_signed(122, BYTE_WIDTH));
                 else
                     SOFTSIGN_OUTPUT_v(i) := std_logic_vector(to_signed(SOFTSIGN_SIGNED(to_integer(signed(SOFTSIGN_ROUND_v(i)(20 downto 1)))), BYTE_WIDTH));
@@ -448,7 +448,7 @@ begin
             if SIGNED_NOT_UNSIGNED_v = '1' then -- Signed
                 if signed(SOFTPLUS_ROUND_v(i)(20 downto 1)) <  -128 then
                     SOFTPLUS_OUTPUT_v(i) := (others => '0');
-                elsif signed(SOFTPLUS_ROUND_v(i)(20 downto 1)) > 18 then
+                elsif signed(SOFTPLUS_ROUND_v(i)(20 downto 1)) > 17 then
                     SOFTPLUS_OUTPUT_v(i) := std_logic_vector(to_signed(255, BYTE_WIDTH));
                 else
                     SOFTPLUS_OUTPUT_v(i) := std_logic_vector(to_signed(SOFTPLUS_SIGNED(to_integer(signed(SOFTPLUS_ROUND_v(i)(20 downto 1)))), BYTE_WIDTH));
