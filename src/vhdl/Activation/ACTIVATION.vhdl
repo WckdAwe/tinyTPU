@@ -66,10 +66,10 @@ architecture BEH of ACTIVATION is
     constant TANH_SIGNED     : INTEGER_ARRAY_TYPE(-80 to 84) := (254, 254, 254, 254, 254, 254, 254, 254, 254, 253, 253, 253, 253, 253, 252, 252, 252, 252, 251, 251, 251, 250, 250, 250, 249, 249, 248, 248, 248, 247, 246, 246, 245, 245, 244, 243, 242, 241, 241, 240, 239, 238, 237, 235, 234, 233, 232, 230, 229, 227, 225, 224, 222, 220, 218, 216, 214, 212, 209, 207, 204, 202, 199, 196, 193, 190, 187, 184, 181, 177, 174, 170, 167, 163, 159, 156, 152, 148, 144, 140, 136, 132, 0, 4, 8, 12, 16, 20, 24, 28, 31, 35, 39, 42, 46, 49, 53, 56, 59, 62, 65, 68, 71, 74, 76, 79, 81, 84, 86, 88, 90, 92, 94, 96, 97, 99, 101, 102, 104, 105, 106, 107, 109, 110, 111, 112, 113, 113, 114, 115, 116, 117, 117, 118, 118, 119, 120, 120, 120, 121, 121, 122, 122, 122, 123, 123, 123, 124, 124, 124, 124, 125, 125, 125, 125, 125, 126, 126, 126, 126, 126, 126, 126, 126, 126);  
 
     constant SOFTSIGN_UNSIGNED  : INTEGER_ARRAY_TYPE(0 to 246) := (0, 8, 15, 22, 28, 35, 40, 46, 51, 56, 61, 65, 70, 74, 78, 82, 85, 89, 92, 95, 98, 101, 104, 107, 110, 112, 115, 117, 119, 122, 124, 126, 128, 130, 132, 134, 136, 137, 139, 141, 142, 144, 145, 147, 148, 150, 151, 152, 154, 155, 156, 157, 158, 160, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 172, 173, 174, 175, 176, 176, 177, 178, 179, 179, 180, 181, 182, 182, 183, 184, 184, 185, 185, 186, 187, 187, 188, 188, 189, 189, 190, 190, 191, 191, 192, 192, 193, 193, 194, 194, 195, 195, 196, 196, 197, 197, 197, 198, 198, 199, 199, 200, 200, 200, 201, 201, 201, 202, 202, 202, 203, 203, 203, 204, 204, 204, 205, 205, 205, 206, 206, 206, 207, 207, 207, 208, 208, 208, 208, 209, 209, 209, 209, 210, 210, 210, 210, 211, 211, 211, 211, 212, 212, 212, 212, 213, 213, 213, 213, 214, 214, 214, 214, 214, 215, 215, 215, 215, 215, 216, 216, 216, 216, 216, 217, 217, 217, 217, 217, 218, 218, 218, 218, 218, 218, 219, 219, 219, 219, 219, 219, 220, 220, 220, 220, 220, 220, 221, 221, 221, 221, 221, 221, 221, 222, 222, 222, 222, 222, 222, 222, 223, 223, 223, 223, 223, 223, 223, 223, 224, 224, 224, 224, 224, 224, 224, 224, 225, 225, 225, 225, 225, 225, 225, 225, 226, 226, 226, 226, 226, 226, 226, 226, 226, 227);
-    constant SOFTSIGN_SIGNED    : INTEGER_ARRAY_TYPE(-128 to 110) := (242, 242, 242, 241, 241, 241, 241, 241, 241, 241, 241, 241, 240, 240, 240, 240, 240, 240, 240, 240, 239, 239, 239, 239, 239, 239, 239, 238, 238, 238, 238, 238, 238, 238, 237, 237, 237, 237, 237, 236, 236, 236, 236, 236, 236, 235, 235, 235, 235, 234, 234, 234, 234, 233, 233, 233, 233, 232, 232, 232, 232, 231, 231, 231, 230, 230, 230, 229, 229, 229, 228, 228, 228, 227, 227, 226, 226, 225, 225, 224, 224, 223, 223, 222, 222, 221, 221, 220, 219, 219, 218, 217, 217, 216, 215, 214, 213, 212, 211, 210, 209, 208, 207, 206, 205, 203, 202, 201, 199, 197, 196, 194, 192, 190, 188, 185, 183, 180, 177, 174, 171, 167, 163, 158, 154, 148, 142, 136, 0, 8, 14, 20, 26, 30, 35, 39, 43, 46, 49, 52, 55, 57, 60, 62, 64, 66, 68, 69, 71, 73, 74, 75, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 89, 90, 91, 91, 92, 93, 93, 94, 94, 95, 95, 96, 96, 97, 97, 98, 98, 99, 99, 100, 100, 100, 101, 101, 101, 102, 102, 102, 103, 103, 103, 104, 104, 104, 104, 105, 105, 105, 105, 106, 106, 106, 106, 107, 107, 107, 107, 108, 108, 108, 108, 108, 108, 109, 109, 109, 109, 109, 110, 110, 110, 110, 110, 110, 110, 111, 111, 111, 111, 111, 111, 111, 112);
+    constant SOFTSIGN_SIGNED    : INTEGER_ARRAY_TYPE(-128 to 109) := (242, 242, 242, 241, 241, 241, 241, 241, 241, 241, 241, 241, 240, 240, 240, 240, 240, 240, 240, 240, 239, 239, 239, 239, 239, 239, 239, 238, 238, 238, 238, 238, 238, 238, 237, 237, 237, 237, 237, 236, 236, 236, 236, 236, 236, 235, 235, 235, 235, 234, 234, 234, 234, 233, 233, 233, 233, 232, 232, 232, 232, 231, 231, 231, 230, 230, 230, 229, 229, 229, 228, 228, 228, 227, 227, 226, 226, 225, 225, 224, 224, 223, 223, 222, 222, 221, 221, 220, 219, 219, 218, 217, 217, 216, 215, 214, 213, 212, 211, 210, 209, 208, 207, 206, 205, 203, 202, 201, 199, 197, 196, 194, 192, 190, 188, 185, 183, 180, 177, 174, 171, 167, 163, 158, 154, 148, 142, 136, 0, 8, 14, 20, 26, 30, 35, 39, 43, 46, 49, 52, 55, 57, 60, 62, 64, 66, 68, 69, 71, 73, 74, 75, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 89, 90, 91, 91, 92, 93, 93, 94, 94, 95, 95, 96, 96, 97, 97, 98, 98, 99, 99, 100, 100, 100, 101, 101, 101, 102, 102, 102, 103, 103, 103, 104, 104, 104, 104, 105, 105, 105, 105, 106, 106, 106, 106, 107, 107, 107, 107, 108, 108, 108, 108, 108, 108, 109, 109, 109, 109, 109, 110, 110, 110, 110, 110, 110, 110, 111, 111, 111, 111, 111, 111, 111, 112);
 
     constant SOFTPLUS_UNSIGNED: INTEGER_ARRAY_TYPE(0 to 235) := (89, 89, 90, 90, 91, 91, 92, 92, 93, 93, 94, 94, 95, 95, 96, 96, 97, 98, 98, 99, 99, 100, 100, 101, 101, 102, 102, 103, 103, 104, 105, 105, 106, 106, 107, 107, 108, 109, 109, 110, 110, 111, 111, 112, 113, 113, 114, 114, 115, 116, 116, 117, 117, 118, 119, 119, 120, 120, 121, 122, 122, 123, 123, 124, 125, 125, 126, 127, 127, 128, 128, 129, 130, 130, 131, 132, 132, 133, 134, 134, 135, 136, 136, 137, 137, 138, 139, 139, 140, 141, 141, 142, 143, 143, 144, 145, 146, 146, 147, 148, 148, 149, 150, 150, 151, 152, 152, 153, 154, 154, 155, 156, 157, 157, 158, 159, 159, 160, 161, 162, 162, 163, 164, 164, 165, 166, 167, 167, 168, 169, 170, 170, 171, 172, 173, 173, 174, 175, 175, 176, 177, 178, 178, 179, 180, 181, 181, 182, 183, 184, 185, 185, 186, 187, 188, 188, 189, 190, 191, 191, 192, 193, 194, 195, 195, 196, 197, 198, 199, 199, 200, 201, 202, 202, 203, 204, 205, 206, 206, 207, 208, 209, 210, 210, 211, 212, 213, 214, 215, 215, 216, 217, 218, 219, 219, 220, 221, 222, 223, 224, 224, 225, 226, 227, 228, 229, 229, 230, 231, 232, 233, 234, 234, 235, 236, 237, 238, 239, 239, 240, 241, 242, 243, 244, 245, 245, 246, 247, 248, 249, 250, 250, 251, 252, 253, 254);
-    constant SOFTPLUS_SIGNED: INTEGER_ARRAY_TYPE(-128 to 18) := (5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 14, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 20, 20, 21, 21, 22, 23, 23, 24, 25, 26, 26, 27, 28, 29, 30, 31, 32, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 45, 46, 47, 49, 50, 52, 53, 55, 56, 58, 59, 61, 63, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 85, 87, 89, 92, 94, 96, 99, 102, 104, 107, 110, 113, 115, 118, 121, 124, 128, 131, 134, 137, 141, 144, 147, 151, 155, 158, 162, 166, 170, 173, 177, 181, 186, 190, 194, 198, 203, 207, 211, 216, 221, 225, 230, 235, 240, 244, 249, 254);
+    constant SOFTPLUS_SIGNED: INTEGER_ARRAY_TYPE(-128 to 17) := (5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9, 10, 10, 10, 11, 11, 11, 12, 12, 12, 13, 13, 14, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 20, 20, 21, 21, 22, 23, 23, 24, 25, 26, 26, 27, 28, 29, 30, 31, 32, 32, 33, 34, 35, 37, 38, 39, 40, 41, 42, 43, 45, 46, 47, 49, 50, 52, 53, 55, 56, 58, 59, 61, 63, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 85, 87, 89, 92, 94, 96, 99, 102, 104, 107, 110, 113, 115, 118, 121, 124, 128, 131, 134, 137, 141, 144, 147, 151, 155, 158, 162, 166, 170, 173, 177, 181, 186, 190, 194, 198, 203, 207, 211, 216, 221, 225, 230, 235, 240, 244, 249, 254);
 
     type SIGMOID_ARRAY_TYPE is array(natural range<>) of std_logic_vector(20 downto 0);
     type SOFTSIGN_ARRAY_TYPE is array(natural range<>) of std_logic_vector(20 downto 0);
@@ -192,7 +192,6 @@ begin
             end if;
             
             --SOFTPLUS  UNSIGNED Q1.7 -> Q1.7        --SIGNED Q3.5 -> Qu8
-            --TODO : CHECK IF THIS IS RIGHT
             if SIGNED_NOT_UNSIGNED_REG_cs(0) = '0' then
                 -- unsigned - Q1.7 table range
                 SOFTPLUS_ROUND_REG_ns(i) <= std_logic_vector(unsigned(INPUT_REG_cs(i)(4*BYTE_WIDTH-1 downto 2*BYTE_WIDTH-7)) + INPUT_REG_cs(i)(2*BYTE_WIDTH-8));
@@ -284,9 +283,9 @@ begin
         SIGNED_NOT_UNSIGNED_v   := SIGNED_NOT_UNSIGNED_REG_cs(1);
         ELU_ROUND_v             := ELU_ROUND_REG_cs;
         
-            if SIGNED_NOT_UNSIGNED_v = '1' then
         for i in 0 to MATRIX_WIDTH-1 loop
                 -- Q4.4
+            if SIGNED_NOT_UNSIGNED_v = '1' then
                 if    signed(ELU_ROUND_v(i)(3*BYTE_WIDTH-1 downto 1*BYTE_WIDTH)) <= -4 then -- Bounded ELU (0.195)
                     ELU_OUTPUT_v(i) := std_logic_vector(to_unsigned(153, BYTE_WIDTH));
                 elsif signed(ELU_ROUND_v(i)(3*BYTE_WIDTH-1 downto 1*BYTE_WIDTH)) >= 1 then -- Bounded ELU (~1)
@@ -448,7 +447,7 @@ begin
         for i in 0 to MATRIX_WIDTH-1 loop
             if SIGNED_NOT_UNSIGNED_v = '1' then -- Signed
                 if signed(SOFTPLUS_ROUND_v(i)(20 downto 1)) <  -128 then
-                    SOFTSIGN_OUTPUT_v(i) := (others => '0');
+                    SOFTPLUS_OUTPUT_v(i) := (others => '0');
                 elsif signed(SOFTPLUS_ROUND_v(i)(20 downto 1)) > 18 then
                     SOFTPLUS_OUTPUT_v(i) := std_logic_vector(to_signed(255, BYTE_WIDTH));
                 else
@@ -466,8 +465,8 @@ begin
         SOFTPLUS_OUTPUT <= SOFTPLUS_OUTPUT_v;
     end process SOFTPLUS_ACTIVATION;
     
-    CHOOSE_ACTIVATION:
-    process(ACTIVATION_FUNCTION_REG1_cs, RELU_OUTPUT, SIGMOID_OUTPUT, ELU_OUTPUT, SELU_OUTPUT, TANH_OUTPUT, INPUT_PIPE0_cs) is
+    CHOOSE_ACTIVATION:  --uncomment RELu6?
+    process(ACTIVATION_FUNCTION_REG1_cs, RELU_OUTPUT, SIGMOID_OUTPUT, ELU_OUTPUT, SELU_OUTPUT, TANH_OUTPUT, RELU6_OUTPUT, SOFTPLUS_OUTPUT, SOFTSIGN_OUTPUT, INPUT_PIPE0_cs) is
         variable ACTIVATION_FUNCTION_v  : ACTIVATION_BIT_TYPE;
         variable RELU_OUTPUT_v          : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
         variable SIGMOID_OUTPUT_v       : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
@@ -475,7 +474,9 @@ begin
         variable SELU_OUTPUT_v          : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
         variable TANH_OUTPUT_v          : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
         variable ACTIVATION_INPUT_v     : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
-        
+        --variable RELU6_OUTPUT_v         : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
+        variable SOFTPLUS_OUTPUT_v      : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
+        variable SOFTSIGN_OUTPUT_v      : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
         variable OUTPUT_REG_ns_v        : BYTE_ARRAY_TYPE(0 to MATRIX_WIDTH-1);
     begin
         ACTIVATION_FUNCTION_v   := ACTIVATION_FUNCTION_REG1_cs;
@@ -484,6 +485,9 @@ begin
         ELU_OUTPUT_v            := ELU_OUTPUT;
         SELU_OUTPUT_v           := SELU_OUTPUT;
         TANH_OUTPUT_v           := TANH_OUTPUT;
+        --RELU6_OUTPUT_v          := RELU6_OUTPUT;
+        SOFTPLUS_OUTPUT_v       := SOFTPLUS_OUTPUT;
+        SOFTSIGN_OUTPUT_v       := SOFTSIGN_OUTPUT;
         ACTIVATION_INPUT_v      := INPUT_PIPE0_cs;
         for i in 0 to MATRIX_WIDTH-1 loop            
             case BITS_TO_ACTIVATION(ACTIVATION_FUNCTION_v) is
@@ -492,6 +496,9 @@ begin
                 when ELU => OUTPUT_REG_ns_v(i) := ELU_OUTPUT_v(i);
                 when SELU => OUTPUT_REG_ns_v(i) := SELU_OUTPUT_v(i);
                 when TANH => OUTPUT_REG_ns_v(i) := TANH_OUTPUT_v(i);
+                --when RELU6 => OUTPUT_REG_ns_v(i) := RELU6_OUTPUT_v(i);
+                when SOFTPLUS => OUTPUT_REG_ns_v(i) := SOFTPLUS_OUTPUT_v(i);
+                when SOFTSIGN => OUTPUT_REG_ns_v(i) := SOFTSIGN_OUTPUT_v(i);
                 when NO_ACTIVATION => OUTPUT_REG_ns_v(i) := ACTIVATION_INPUT_v(i);
                 when others => 
                     report "Unknown activation function!" severity ERROR;
@@ -517,6 +524,9 @@ begin
                 ELU_ROUND_REG_cs    <= (others => (others => '0'));
                 SELU_ROUND_REG_cs   <= (others => (others => '0'));
                 TANH_ROUND_REG_cs   <= (others => (others => '0'));
+               -- RELU6_ROUND_REG_cs    <= (others => (others => '0'));
+                SOFTPLUS_ROUND_REG_cs   <= (others => (others => '0'));
+                SOFTSIGN_ROUND_REG_cs   <= (others => (others => '0'));
                 SIGNED_NOT_UNSIGNED_REG_cs  <= (others => '0');
                 ACTIVATION_FUNCTION_REG0_cs <= (others => '0');
                 ACTIVATION_FUNCTION_REG1_cs <= (others => '0');
@@ -530,6 +540,9 @@ begin
                     ELU_ROUND_REG_cs <= ELU_ROUND_REG_ns;
                     SELU_ROUND_REG_cs <= SELU_ROUND_REG_ns;
                     TANH_ROUND_REG_cs <= TANH_ROUND_REG_ns;
+                    -- RELU6_ROUND_REG_cs    <= (others => (others => '0'));
+                    SOFTPLUS_ROUND_REG_cs   <= SOFTPLUS_ROUND_REG_ns;
+                    SOFTSIGN_ROUND_REG_cs   <= SOFTSIGN_ROUND_REG_ns;
                     SIGNED_NOT_UNSIGNED_REG_cs  <= SIGNED_NOT_UNSIGNED_REG_ns;
                     ACTIVATION_FUNCTION_REG0_cs <= ACTIVATION_FUNCTION_REG0_ns;
                     ACTIVATION_FUNCTION_REG1_cs <= ACTIVATION_FUNCTION_REG1_ns;
