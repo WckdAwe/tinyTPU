@@ -184,8 +184,8 @@ begin
 
             --SOFTSIGN
             if SIGNED_NOT_UNSIGNED_REG_cs(0) = '0' then
-                -- unsigned - Qu3.5 table range
-                SOFTSIGN_ROUND_REG_ns(i) <= std_logic_vector(unsigned(INPUT_REG_cs(i)(4*BYTE_WIDTH-1 downto 2*BYTE_WIDTH-5)) + INPUT_REG_cs(i)(2*BYTE_WIDTH-6));
+                -- unsigned - Qu4.4 table range
+                SOFTSIGN_ROUND_REG_ns(i) <= std_logic_vector(unsigned(INPUT_REG_cs(i)(4*BYTE_WIDTH-1 downto 2*BYTE_WIDTH-4)) + INPUT_REG_cs(i)(2*BYTE_WIDTH-5)) & '0';
             else
                 -- signed - Q4.4 table range
                 SOFTSIGN_ROUND_REG_ns(i) <= std_logic_vector(unsigned(INPUT_REG_cs(i)(4*BYTE_WIDTH-1 downto 2*BYTE_WIDTH-4)) + INPUT_REG_cs(i)(2*BYTE_WIDTH-5)) & '0';
